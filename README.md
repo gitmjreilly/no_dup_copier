@@ -3,9 +3,12 @@ Program to copy directory trees, maintaining tree structure but avoiding duplica
 
 ## Requirements
 This program was built using a pipenv environment on Windows 10.
+
 Install pipenv!
-With pipenv you can run "pipenv install" from a command line to get an 
-environment with the necessary modules.
+
+From a command line run "pipenv install" to install the necessary runtime environment.
+
+To run the program run pipenv run photo_organizer.py
 
 
 ### TODO Check for overlapping directories
