@@ -1,18 +1,12 @@
 #!python
-import typing
-import sys
+
 import os
-import re
 from pathlib import Path
 import hashlib
-from typing import NamedTuple, Mapping, Dict
+from typing import  Dict
 import shutil
 
 # Photo organizer program
-
-
-SOURCE_BASE_DIR = Path("/users/mj/mjsrc2021")
-SOURCE_BASE_DIR = Path("C:/Users/mj/MyPictures/356Renovation")
 
 SOURCE_BASE_DIR = Path("d:/source_pictures")
 DESTINATION_BASE_DIR = Path("d:/destination_pictures")
@@ -20,7 +14,7 @@ DESTINATION_BASE_DIR = Path("d:/destination_pictures")
 CHUNK_SIZE = 8192 * 512
 
 
-def get_file_checksum(filename : str) -> str:
+def get_file_checksum(filename : Path) -> str:
     """ Given a filename, return a hexdigest string """
     with open(filename, "rb") as f:
         hash = hashlib.blake2b()
@@ -39,11 +33,10 @@ def main():
 
     num_copied = 0
     num_skipped = 0
-    copy_info_by_checksum : Dict[str, str]  = {}
-    copy_info_by_checksum[13] = 23
+    copy_info_by_checksum : Dict[str, Path]  = {}
 
     print("Photo organizer program!")
-    for (fully_qualified_source_dir, _dir_names, unqualified_file_names) in os.walk(SOURCE_BASE_DIR):
+    for (fully_qualified_source_dir, _, unqualified_file_names) in os.walk(SOURCE_BASE_DIR):
 
         fully_qualified_source_dir = Path(fully_qualified_source_dir)
 
