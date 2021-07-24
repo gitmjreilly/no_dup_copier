@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/python3.8
 
 import os
 import sys
@@ -9,8 +9,8 @@ import shutil
 
 
 
-SOURCE_BASE_DIR = Path("d:/source_pictures")
-DESTINATION_BASE_DIR = Path("d:/destination_pictures")
+SOURCE_BASE_DIR = Path("/home/mj/source")
+DESTINATION_BASE_DIR = Path("/home/mj/destination")
 
 CHUNK_SIZE = 8192 * 512
 
@@ -63,8 +63,11 @@ def folders_are_mutually_relative(f1 : Path, f2 : Path) -> int:
 def main():
     print("No duplicate file copier.")
 
+    num_files_seen = 0
     num_copied = 0
-    num_skipped = 0
+    num_duplicates = 0
+    num_symlinks = 0
+    num_non_regular = 0
     copy_info_by_checksum : Dict[str, Path] = {}
 
     n = folders_are_mutually_relative(SOURCE_BASE_DIR, DESTINATION_BASE_DIR)
@@ -105,15 +108,23 @@ def main():
         fully_qualified_destination_dir.mkdir(parents = True, exist_ok=True)
 
         for unqualified_file_name in unqualified_file_names:
+            num_files_seen += 1
             print("  ########")
                      
             fully_qualified_source_name = fully_qualified_source_dir / unqualified_file_name
             fully_qualified_destination_name = fully_qualified_destination_dir / unqualified_file_name
 
             print("  SOURCE Name   [%s]" % (fully_qualified_source_name))
-            if (not fully_qualified_source_name.is_file()):
+            if (not fully_qualified_source_name.is_file() ):
                 print("INFO source file is not a regular file; skipping it.")
+                num_non_regular += 1
                 continue
+
+            if (fully_qualified_source_name.is_symlink()):
+                print("INFO source file is symlink; skipping it.")
+                num_symlinks += 1
+                continue
+
 
             check_sum = get_file_checksum(fully_qualified_source_name)
             # print("  DEBUG      Digest is [%s]" % check_sum)
@@ -127,10 +138,13 @@ def main():
             else:
                 print("  INFO We already saw %s - will NOT copy" % (fully_qualified_source_name))
                 print("  It was copied as [%s]" % (copy_info_by_checksum[check_sum]))
-                num_skipped += 1
+                num_duplicates += 1
 
-    print("Num copied : %d" % (num_copied))
-    print("Num skipped: %d" % (num_skipped))
+    print("Num files seen : %d" % (num_files_seen))
+    print("Num copied     : %d" % (num_copied))
+    print("Num dups       : %d" % (num_duplicates))
+    print("Num symlinks   : %d" % (num_symlinks))
+    print("Num non_reg    : %d" % (num_non_regular))
 
 #
 main()
