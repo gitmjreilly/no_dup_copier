@@ -9,8 +9,8 @@ import shutil
 
 
 
-SOURCE_BASE_DIR = Path("/home/mj/source")
-DESTINATION_BASE_DIR = Path("/home/mj/destination")
+SOURCE_BASE_DIR = Path("d:/source_pictures")
+DESTINATION_BASE_DIR = Path("d:/destination_pictures")
 
 CHUNK_SIZE = 8192 * 512
 
