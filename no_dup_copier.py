@@ -111,6 +111,10 @@ def main():
             fully_qualified_destination_name = fully_qualified_destination_dir / unqualified_file_name
 
             print("  SOURCE Name   [%s]" % (fully_qualified_source_name))
+            if (not fully_qualified_source_name.is_file()):
+                print("INFO source file is not a regular file; skipping it.")
+                continue
+
             check_sum = get_file_checksum(fully_qualified_source_name)
             # print("  DEBUG      Digest is [%s]" % check_sum)
             print("  DEST  Name    [%s]" % (fully_qualified_destination_name))
