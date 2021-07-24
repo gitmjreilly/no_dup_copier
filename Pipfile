@@ -9,6 +9,7 @@ jupyter = "*"
 [dev-packages]
 mypy = "*"
 pylint = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.8"

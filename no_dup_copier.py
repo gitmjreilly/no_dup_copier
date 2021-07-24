@@ -1,12 +1,13 @@
 #!python
 
 import os
+import sys
 from pathlib import Path
 import hashlib
-from typing import  Dict
+from typing import Dict
 import shutil
 
-# Photo organizer program
+
 
 SOURCE_BASE_DIR = Path("d:/source_pictures")
 DESTINATION_BASE_DIR = Path("d:/destination_pictures")
@@ -29,13 +30,54 @@ def get_file_checksum(filename : Path) -> str:
     return(str(hash.hexdigest()))
 
 
+def folders_are_mutually_relative(f1 : Path, f2 : Path) -> int:
+    """ 
+    Check if two folders are relative to each other
+
+    if f1 is within f2 return 1
+
+    if f2 is within f1 return 2
+
+    else return 0
+    
+    """
+
+    try:
+        f1.relative_to(f2)
+        return(1)
+    except:
+        pass
+        
+    try:
+        f2.relative_to(f1)
+        return(2)
+    except:
+        pass
+        
+
+    return(0)
+
+
+
+
 def main():
+    print("No duplicate file copier.")
 
     num_copied = 0
     num_skipped = 0
-    copy_info_by_checksum : Dict[str, Path]  = {}
+    copy_info_by_checksum : Dict[str, Path] = {}
 
-    print("Photo organizer program!")
+    n = folders_are_mutually_relative(SOURCE_BASE_DIR, DESTINATION_BASE_DIR)
+    if (n == 1):
+        print("ERROR Source is within dest; not allowed!")
+        sys.exit(1)
+    elif (n == 2):
+        print("ERROR Destination folder is within the Source folder; not allowed!")
+        sys.exit(1)
+
+ 
+
+
     for (fully_qualified_source_dir, _, unqualified_file_names) in os.walk(SOURCE_BASE_DIR):
 
         fully_qualified_source_dir = Path(fully_qualified_source_dir)
