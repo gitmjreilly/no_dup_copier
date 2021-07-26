@@ -81,62 +81,59 @@ def main():
  
 
 
-    for (fully_qualified_source_dir, _, unqualified_file_names) in os.walk(SOURCE_BASE_DIR):
+    for (absolute_source_dir, _, relative_filenames) in os.walk(SOURCE_BASE_DIR):
 
-        fully_qualified_source_dir = Path(fully_qualified_source_dir)
+        # We work with Path's not strings as returned by os.walk...
+        absolute_source_dir = Path(absolute_source_dir)
 
         print("\n+++++++++++++++++++++")
-        # print("DEBUG fully qualified source dir [%s] " % (fully_qualified_source_dir))
+        
 
         #
-        # create the qualified dir based on the qualified_source_dir
+        # create the relative dir based on the SOURCE_BASE_DIR and absolute_source_dir
         # We do this by looking at the number of parts in the SOURCE_BASE_DIR
-        # and removing that many parts from a copy of the fully_qualified_source_dir
+        # and removing that many parts from a copy of the absolute_source_dir
         # I copied the parts to a list to do this...
         #
-        l = list(fully_qualified_source_dir.parts)
+        l = list(absolute_source_dir.parts)
         l = l[len(SOURCE_BASE_DIR.parts):]
         
-        qualified_dir = Path("./")
+        relative_dir = Path("./")
         for part in l:
-            qualified_dir = qualified_dir / part
+            relative_dir = relative_dir / part
 
-        # print("DEBUG qualified dir [%s] " % (qualified_dir))
+        absolute_destination_dir = DESTINATION_BASE_DIR /  relative_dir
+        absolute_destination_dir.mkdir(parents = True, exist_ok=True)
 
-        fully_qualified_destination_dir = DESTINATION_BASE_DIR /  qualified_dir
-        # print("DEBUG fully qualified destination dir [%s] " % (fully_qualified_destination_dir))
-        fully_qualified_destination_dir.mkdir(parents = True, exist_ok=True)
-
-        for unqualified_file_name in unqualified_file_names:
+        for relative_filename in relative_filenames:
             num_files_seen += 1
             print("  ########")
                      
-            fully_qualified_source_name = fully_qualified_source_dir / unqualified_file_name
-            fully_qualified_destination_name = fully_qualified_destination_dir / unqualified_file_name
+            absolute_source_name = absolute_source_dir / relative_filename
+            absolute_destination_name = absolute_destination_dir / relative_filename
 
-            print("  SOURCE Name   [%s]" % (fully_qualified_source_name))
-            if (not fully_qualified_source_name.is_file() ):
+            print("  SOURCE Name   [%s]" % absolute_source_name)
+            if (not absolute_source_name.is_file() ):
                 print("INFO source file is not a regular file; skipping it.")
                 num_non_regular += 1
                 continue
 
-            if (fully_qualified_source_name.is_symlink()):
+            if (absolute_source_name.is_symlink()):
                 print("INFO source file is symlink; skipping it.")
                 num_symlinks += 1
                 continue
 
 
-            check_sum = get_file_checksum(fully_qualified_source_name)
-            # print("  DEBUG      Digest is [%s]" % check_sum)
-            print("  DEST  Name    [%s]" % (fully_qualified_destination_name))
+            check_sum = get_file_checksum(absolute_source_name)
+            print("  DEST  Name    [%s]" % absolute_destination_name)
 
             if check_sum not in copy_info_by_checksum:
                 print("  INFO - We have not seen this file before; will copy it")
-                shutil.copy(str(fully_qualified_source_name), str(fully_qualified_destination_name))
-                copy_info_by_checksum[check_sum] = fully_qualified_source_name
+                shutil.copy(str(absolute_source_name), str(absolute_destination_name))
+                copy_info_by_checksum[check_sum] = absolute_source_name
                 num_copied += 1
             else:
-                print("  INFO We already saw %s - will NOT copy" % (fully_qualified_source_name))
+                print("  INFO We already saw %s - will NOT copy" % absolute_source_name)
                 print("  It was copied as [%s]" % (copy_info_by_checksum[check_sum]))
                 num_duplicates += 1
 
