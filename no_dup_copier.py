@@ -9,8 +9,8 @@ import shutil
 
 
 
-SOURCE_BASE_DIR = Path("d:/source_pictures")
-DESTINATION_BASE_DIR = Path("d:/destination_pictures")
+SOURCE_BASE_DIR = Path("c:/source_pictures")
+DESTINATION_BASE_DIR = Path("c:/destination_pictures")
 
 CHUNK_SIZE = 8192 * 512
 
@@ -58,6 +58,29 @@ def folders_are_mutually_relative(f1 : Path, f2 : Path) -> int:
     return(0)
 
 
+def get_relative_from_absolute(base_dir : Path, absolute_dir : Path) -> Path:
+    """ 
+    Given a base dir like  'c:/base'
+
+    and absolute_dir like  'c:/base/d1/d2'
+
+    return the relative path d1/d2
+    
+    """
+    #
+    # create the relative dir based on the base_dir and absolute_dir
+    # We do this by looking at the number of parts in the base_dir
+    # and removing that many parts from a copy of the absolute_source_dir
+    # I copied the parts to a list to do this...
+    #
+    l = list(absolute_dir.parts)
+    l = l[len(SOURCE_BASE_DIR.parts):]
+    
+    relative_dir = Path("./")
+    for part in l:
+        relative_dir = relative_dir / part
+
+    return(relative_dir)
 
 
 def main():
@@ -83,24 +106,12 @@ def main():
 
     for (absolute_source_dir, _, relative_filenames) in os.walk(SOURCE_BASE_DIR):
 
-        # We work with Path's not strings as returned by os.walk...
+        # We work with Path's not the strings returned by os.walk...
         absolute_source_dir = Path(absolute_source_dir)
 
         print("\n+++++++++++++++++++++")
         
-
-        #
-        # create the relative dir based on the SOURCE_BASE_DIR and absolute_source_dir
-        # We do this by looking at the number of parts in the SOURCE_BASE_DIR
-        # and removing that many parts from a copy of the absolute_source_dir
-        # I copied the parts to a list to do this...
-        #
-        l = list(absolute_source_dir.parts)
-        l = l[len(SOURCE_BASE_DIR.parts):]
-        
-        relative_dir = Path("./")
-        for part in l:
-            relative_dir = relative_dir / part
+        relative_dir = get_relative_from_absolute(SOURCE_BASE_DIR, absolute_source_dir)
 
         absolute_destination_dir = DESTINATION_BASE_DIR /  relative_dir
         absolute_destination_dir.mkdir(parents = True, exist_ok=True)
