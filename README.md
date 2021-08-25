@@ -18,4 +18,4 @@ The source and destination folders are specified as constants in the code.
 
 Uses python pathlib so it may be OK assuming pipenv is installed.
 
-Allow for rerunning where files are NOT copied if they are already present in the destination.
+Allow for rerunning where files are NOT copied if they are already present in the destination folder.
