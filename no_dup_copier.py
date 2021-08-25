@@ -9,8 +9,8 @@ import shutil
 
 
 
-SOURCE_BASE_DIR = Path("c:/source_pictures")
-DESTINATION_BASE_DIR = Path("c:/destination_pictures")
+# SOURCE_BASE_DIR = Path("c:/source_pictures")
+# DESTINATION_BASE_DIR = Path("c:/destination_pictures")
 
 CHUNK_SIZE = 8192 * 512
 
@@ -74,7 +74,7 @@ def get_relative_path_from_absolute(base_dir : Path, absolute_dir : Path) -> Pat
     # I copied the parts to a list to do this...
     #
     l = list(absolute_dir.parts)
-    l = l[len(SOURCE_BASE_DIR.parts):]
+    l = l[len(base_dir.parts):]
     
     relative_dir = Path("./")
     for part in l:
@@ -104,8 +104,18 @@ def get_hashes_from_dir(the_base_dir : Path) -> Dict[str, Path]:
 
     return(file_info_by_checksum)
 
+def usage(program_name : str):
+    print(f"usage: {program_name} source_folder destination_folder")
+
 def main():
     print("No duplicate file copier.")
+
+    if len(sys.argv) != 3:
+        usage(sys.argv[0])
+        sys.exit(1)
+
+    SOURCE_BASE_DIR = Path(sys.argv[1])
+    DESTINATION_BASE_DIR = Path(sys.argv[2])
 
     num_files_seen = 0
     num_copied = 0
