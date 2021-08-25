@@ -17,3 +17,5 @@ The source and destination folders are specified as constants in the code.
 ## TODO Check for proper function on Windows and Unix
 
 Uses python pathlib so it may be OK assuming pipenv is installed.
+
+Allow for rerunning where files are NOT copied if they are already present in the destination.
