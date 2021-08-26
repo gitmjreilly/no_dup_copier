@@ -6,10 +6,12 @@ from pathlib import Path
 import hashlib
 from typing import Dict
 import shutil
+import logging
+
 
 
 CHUNK_SIZE = 8192 * 512
-
+LOG_FILENAME = "run.log"
 
 def get_file_hash(filename : Path) -> str:
     """ Given a filename, return a hexdigest string """
@@ -104,11 +106,23 @@ def usage(program_name : str):
     print(f"usage: {program_name} source_folder destination_folder")
 
 def main():
-    print("No duplicate file copier.")
 
     if len(sys.argv) != 3:
         usage(sys.argv[0])
         sys.exit(1)
+
+
+    logging.basicConfig(
+        level=logging.INFO,
+        filename = LOG_FILENAME
+    )
+
+    console= logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    logging.getLogger('').addHandler(console)
+
+    logging.info("No duplicate file copier.")
+
 
     SOURCE_BASE_DIR = Path(sys.argv[1])
     DESTINATION_BASE_DIR = Path(sys.argv[2])
@@ -122,10 +136,10 @@ def main():
 
     n = folders_are_mutually_relative(SOURCE_BASE_DIR, DESTINATION_BASE_DIR)
     if (n == 1):
-        print("ERROR Source is within dest; not allowed!")
+        logging.info("ERROR Source is within dest; not allowed!")
         sys.exit(1)
     elif (n == 2):
-        print("ERROR Destination folder is within the Source folder; not allowed!")
+        logging.info("ERROR Destination folder is within the Source folder; not allowed!")
         sys.exit(1)
 
     # Get all of the hashes for the files in the destination folder
@@ -133,9 +147,9 @@ def main():
     # copied files into the destination.
     # If so, we want to know about those files so we don't copy
     # them (or files with same checksum) again.
-    print(f"INFO Scanning {DESTINATION_BASE_DIR} so we know what files were already copied...")
+    logging.info(f"Scanning {DESTINATION_BASE_DIR} so we know what files were already copied...")
     copy_info_by_hash = get_hashes_from_dir(DESTINATION_BASE_DIR)
-    print(f"INFO There were {len(copy_info_by_hash)} existing files found.")
+    logging.info(f"There were {len(copy_info_by_hash)} existing files found.")
 
 
     # Recursively walk the source dir
@@ -148,7 +162,7 @@ def main():
         # We work with Path's not the strings returned by os.walk...
         absolute_source_dir = Path(absolute_source_dir)
 
-        print(f"INFO looking in folder {absolute_source_dir}")
+        logging.info(f"Looking in folder {absolute_source_dir}")
         
         relative_dir = get_relative_path_from_absolute(SOURCE_BASE_DIR, absolute_source_dir)
 
@@ -161,14 +175,13 @@ def main():
             absolute_source_name = absolute_source_dir / relative_filename
             absolute_destination_name = absolute_destination_dir / relative_filename
 
-            # print("  SOURCE Name   [%s]" % absolute_source_name)
             if (not absolute_source_name.is_file() ):
-                print("INFO source file is not a regular file; skipping it.")
+                logging.info("Source file is not a regular file; skipping it.")
                 num_non_regular += 1
                 continue
 
             if (absolute_source_name.is_symlink()):
-                print("INFO source file is symlink; skipping it.")
+                logging.info("Source file is symlink; skipping it.")
                 num_symlinks += 1
                 continue
 
@@ -176,28 +189,24 @@ def main():
 
             # Check for easy case where file has already been seen
             if hash  in copy_info_by_hash:
-                # print("  INFO We already saw %s - will NOT copy" % absolute_source_name)
-                # print("  It was copied as [%s]" % (copy_info_by_hash[hash]))
-
-                print(f"INFO SOURCE is a dup; NOT Copying {absolute_source_name}    See:  {copy_info_by_hash[hash]}")
+                logging.info(f"SOURCE is a dup; NOT Copying {absolute_source_name}    See:  {copy_info_by_hash[hash]}")
                 num_duplicates += 1
                 continue
 
 
             # We have not seen this file before (at least not during this run of the program!)
             # Now what?
-            # print("  INFO - We have not seen this file before; will copy it")
-            print(f"INFO SOURCE is NEW; Copying... {absolute_source_name}")
+            logging.info(f"SOURCE is NEW; Copying... {absolute_source_name}")
             shutil.copy(str(absolute_source_name), str(absolute_destination_name))
             copy_info_by_hash[hash] = absolute_destination_name
             num_copied += 1
         
 
-    print("Num files seen : %d" % (num_files_seen))
-    print("Num copied     : %d" % (num_copied))
-    print("Num dups       : %d" % (num_duplicates))
-    print("Num symlinks   : %d" % (num_symlinks))
-    print("Num non_reg    : %d" % (num_non_regular))
+    logging.info("Num files seen : %d" % (num_files_seen))
+    logging.info("Num copied     : %d" % (num_copied))
+    logging.info("Num dups       : %d" % (num_duplicates))
+    logging.info("Num symlinks   : %d" % (num_symlinks))
+    logging.info("Num non_reg    : %d" % (num_non_regular))
 
 #
 main()
