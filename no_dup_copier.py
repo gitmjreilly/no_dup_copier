@@ -8,10 +8,6 @@ from typing import Dict
 import shutil
 
 
-
-# SOURCE_BASE_DIR = Path("c:/source_pictures")
-# DESTINATION_BASE_DIR = Path("c:/destination_pictures")
-
 CHUNK_SIZE = 8192 * 512
 
 
@@ -137,9 +133,9 @@ def main():
     # copied files into the destination.
     # If so, we want to know about those files so we don't copy
     # them (or files with same checksum) again.
-    print(f"Scanning {DESTINATION_BASE_DIR} so we know what files were already copied...")
+    print(f"INFO Scanning {DESTINATION_BASE_DIR} so we know what files were already copied...")
     copy_info_by_hash = get_hashes_from_dir(DESTINATION_BASE_DIR)
-    print(f"There were {len(copy_info_by_hash)} in found.")
+    print(f"INFO There were {len(copy_info_by_hash)} existing files found.")
 
 
     # Recursively walk the source dir
@@ -152,7 +148,7 @@ def main():
         # We work with Path's not the strings returned by os.walk...
         absolute_source_dir = Path(absolute_source_dir)
 
-        print("\n+++++++++++++++++++++")
+        print(f"INFO looking in folder {absolute_source_dir}")
         
         relative_dir = get_relative_path_from_absolute(SOURCE_BASE_DIR, absolute_source_dir)
 
@@ -161,12 +157,11 @@ def main():
 
         for relative_filename in relative_filenames:
             num_files_seen += 1
-            print("  ########")
                      
             absolute_source_name = absolute_source_dir / relative_filename
             absolute_destination_name = absolute_destination_dir / relative_filename
 
-            print("  SOURCE Name   [%s]" % absolute_source_name)
+            # print("  SOURCE Name   [%s]" % absolute_source_name)
             if (not absolute_source_name.is_file() ):
                 print("INFO source file is not a regular file; skipping it.")
                 num_non_regular += 1
@@ -177,25 +172,24 @@ def main():
                 num_symlinks += 1
                 continue
 
-
             hash = get_file_hash(absolute_source_name)
-            print("  DEST  Name    [%s]" % absolute_destination_name)
-
-
 
             # Check for easy case where file has already been seen
             if hash  in copy_info_by_hash:
-                print("  INFO We already saw %s - will NOT copy" % absolute_source_name)
-                print("  It was copied as [%s]" % (copy_info_by_hash[hash]))
+                # print("  INFO We already saw %s - will NOT copy" % absolute_source_name)
+                # print("  It was copied as [%s]" % (copy_info_by_hash[hash]))
+
+                print(f"INFO SOURCE is a dup; NOT Copying {absolute_source_name}    See:  {copy_info_by_hash[hash]}")
                 num_duplicates += 1
                 continue
 
 
             # We have not seen this file before (at least not during this run of the program!)
             # Now what?
-            print("  INFO - We have not seen this file before; will copy it")
+            # print("  INFO - We have not seen this file before; will copy it")
+            print(f"INFO SOURCE is NEW; Copying... {absolute_source_name}")
             shutil.copy(str(absolute_source_name), str(absolute_destination_name))
-            copy_info_by_hash[hash] = absolute_source_name
+            copy_info_by_hash[hash] = absolute_destination_name
             num_copied += 1
         
 
