@@ -7,11 +7,10 @@ import hashlib
 from typing import Dict
 import shutil
 import logging
-
+import time
 
 
 CHUNK_SIZE = 8192 * 512
-LOG_FILENAME = "run.log"
 
 def get_file_hash(filename : Path) -> str:
     """ Given a filename, return a hexdigest string """
@@ -106,6 +105,10 @@ def usage(program_name : str):
     print(f"usage: {program_name} source_folder destination_folder")
 
 def main():
+
+    t = time.localtime()
+    date_stamp = f"{t.tm_year}_{t.tm_mon}_{t.tm_mday}__{t.tm_hour}_{t.tm_min}"
+    LOG_FILENAME = f"run.{date_stamp}.log"
 
     if len(sys.argv) != 3:
         usage(sys.argv[0])
